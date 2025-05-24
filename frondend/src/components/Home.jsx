@@ -1,13 +1,17 @@
 import heroImg from "../assets/heroImg.png";
 import asetTiga from "../assets/aset3.jpg";
 import asetBundel from "../assets/asetBundel.png";
+import fotoAll from "../assets/fotoall.png";
 import secondimg from "../assets/second.png";
 import Element2 from "../assets/element2.png";
 import Element from "../assets/element.png";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { AuthContext } from "./AuthContext";
+import React, { useEffect, useState, useContext } from "react";
+
+import axios from "axios"; // Menggunakan axios untuk mengambil data dari API
 
 const FAQ = [
   {
@@ -29,6 +33,25 @@ const FAQ = [
 const Home = () => {
   const navigate = useNavigate();
   const [actived, setActived] = useState(null);
+  const [produk, setProduk] = useState([]);
+  const { user } = useContext(AuthContext);
+
+  console.log("HomePage user:", user); // cek user di sini
+
+  // Mengambil produk dari server saat halaman dimuat
+  useEffect(() => {
+    const fetchProduk = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/produk");
+        setProduk(response.data); // Menyimpan data produk ke dalam state
+      } catch (error) {
+        console.error("Gagal mengambil produk:", error);
+      }
+    };
+
+    fetchProduk();
+  }, []); // Dependency array kosong agar hanya dijalankan sekali saat pertama kali load
+
   const toggleFunction = (i) => {
     if (actived === i) {
       setActived(null);
@@ -36,6 +59,46 @@ const Home = () => {
       setActived(i);
     }
   };
+
+  const handleBooking = async (item) => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      alert("Silakan login terlebih dahulu untuk melakukan booking.");
+      navigate("/login");
+      return;
+    }
+
+    try {
+      // Jika kamu perlu validasi token atau refresh token, buat fungsi khusus refresh token di sini
+      const response = await axios.get("http://localhost:5000/users", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        withCredentials: true,
+      });
+
+      // Jika perlu update token baru:
+      if (response.data.accessToken) {
+        localStorage.setItem("accessToken", response.data.accessToken);
+      }
+
+      navigate(`/booking`, {
+        state: {
+          id: item.id,
+          picture: item.picture,
+          judul: item.judul,
+          harga: item.harga,
+          deskripsi: item.deskripsi,
+        },
+      });
+    } catch (error) {
+      console.error("Refresh token tidak valid:", error);
+      alert("Silakan login terlebih dahulu untuk melakukan booking.");
+      navigate("/login");
+    }
+  };
+
   return (
     <div id="beranda" className="home-page pb-10">
       <div className="container px-4 mx-auto">
@@ -63,15 +126,19 @@ const Home = () => {
             <img src={heroImg} className="w-[537px] h-[422px]" alt="" />
           </div>
         </div>
-        <div id="tentang-kami" className=" grid grid-cols-2 pt-32">
-          <div className="box">
+
+        <div
+          id="tentang-kami"
+          className=" grid grid-cols-2  items-center justify-center pt-32"
+        >
+          <div className=" ">
             <img
-              src={asetBundel}
-              className="w-[250px] mx-auto  rounded-2xl"
+              src={fotoAll}
+              className="w-[380px] justify-center mx-auto ml-0 rounded-2xl"
               alt=""
             />
           </div>
-          <div className="box">
+          <div className="box ">
             <h2 className="font-bold text-3xl mb-7">Tentang Kami</h2>
             <h1 className="font-bold text-5xl mb-7">
               Kami Bukan Sekadar Bengkel, Kami{" "}
@@ -98,93 +165,36 @@ const Home = () => {
             Apakah kamu ingin tampilan motor yang klasik, elegan, atau nyentrik?{" "}
           </p>
           <div className="card-box  flex gap-8 items-center justify-between ">
-            <div className="box rounded-md w-[400px] pb-7 shadow-md ">
-              <img
-                src={asetTiga}
-                className="w-[400px] rounded-t-md mb-5 "
-                alt=""
-              />
-              <h3 className="font-bold text-[20px] px-4 ">Repaint Full Body</h3>
-              <p className="text-gray-500 mb-4 px-4">Rp.1.000.000</p>
-              <p className="mb-5 font-medium px-4">
-                Repaint full body(body halus dan kasar) paket komplit, untuk
-                motor kesayangan Anda
-              </p>
-              <div className="button flex justify-between items-center  px-4">
-                <button
-                  onClick={() => navigate(`/detailproduct`)}
-                  className="bg-[#FD1E0D] font-medium text-center px-4 py-2 rounded-md font text-white hover:bg-[#ED1100] transition-all "
-                >
-                  Lihat Detail
-                </button>
-                <button
-                  onClick={() => navigate(`/booking`)}
-                  className="border-2 border-[#FD1E0D] font-medium text-center  px-3 py-2 text-[#FD1E0D] rounded-md font  hover:border-[#ff7676] hover:text-[#ff7676]  transition-all "
-                >
-                  Booking Now
-                </button>
+            {produk.map((item) => (
+              <div
+                key={item.id}
+                className="box rounded-md w-[400px] pb-7 shadow-md "
+              >
+                <img
+                  src={`http://localhost:5000/uploads/${item.picture}`}
+                  className="w-[400px] rounded-t-md mb-5 "
+                  alt=""
+                />
+                <h3 className="font-bold text-[20px] px-4 ">{item.judul}</h3>
+                <p className="text-gray-500 mb-4 px-4">{item.harga}</p>
+                <p className="mb-5 font-medium px-4">{item.deskripsi}</p>
+                <div className="button flex justify-between items-center  px-4">
+                  <button
+                    onClick={() => handleBooking(item)}
+                    className="bg-[#FD1E0D] font-medium text-center px-4 py-2 rounded-md font text-white hover:bg-[#ED1100] transition-all "
+                  >
+                    Booking Now
+                  </button>
+                </div>
               </div>
-            </div>
-
-            <div className="box rounded-md w-[400px] pb-7 shadow-md ">
-              <img
-                src={asetTiga}
-                className="w-[400px] rounded-t-md mb-5 "
-                alt=""
-              />
-              <h3 className="font-bold text-[20px] px-4 ">Repaint Full Body</h3>
-              <p className="text-gray-500 mb-4 px-4">Rp.1.000.000</p>
-              <p className="mb-5 font-medium px-4">
-                Repaint full body(body halus dan kasar) paket komplit, untuk
-                motor kesayangan Anda
-              </p>
-              <div className="button flex justify-between items-center gap-8 px-4">
-                <button
-                  onClick={() => navigate(`/detailproduct`)}
-                  className="bg-[#FD1E0D] font-medium text-center px-3 py-2 rounded-md font text-white hover:bg-[#ED1100] transition-all "
-                >
-                  Lihat Detail
-                </button>
-                <button
-                  onClick={() => navigate(`/booking`)}
-                  className="border-2 border-[#FD1E0D] font-medium text-center  px-3 py-2 text-[#FD1E0D] rounded-md font  hover:border-[#ff7676] hover:text-[#ff7676]  transition-all "
-                >
-                  Booking Now
-                </button>
-              </div>
-            </div>
-
-            <div className="box rounded-md w-[400px] pb-7 shadow-md ">
-              <img
-                src={asetTiga}
-                className="w-[400px] rounded-t-md mb-5 "
-                alt=""
-              />
-              <h3 className="font-bold text-[20px] px-4 ">Repaint Full Body</h3>
-              <p className="text-gray-500 mb-4 px-4">Rp.1.000.000</p>
-              <p className="mb-5 font-medium px-4">
-                Repaint full body(body halus dan kasar) paket komplit, untuk
-                motor kesayangan Anda
-              </p>
-              <div className="button flex justify-between items-center gap-8 px-4">
-                <button
-                  onClick={() => navigate(`/detailproduct`)}
-                  className="bg-[#FD1E0D] font-medium text-center px-3 py-2 rounded-md font text-white hover:bg-[#ED1100] transition-all "
-                >
-                  Lihat Detail
-                </button>
-                <button
-                  onClick={() => navigate(`/booking`)}
-                  className="border-2 border-[#FD1E0D] font-medium text-center  px-3 py-2 text-[#FD1E0D] rounded-md font  hover:border-[#ff7676] hover:text-[#ff7676]  transition-all "
-                >
-                  Booking Now
-                </button>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-        <div id="galeri" className="galeri grid grid-cols-2 pt-32 gap-12">
-          <div className="box">
+        <div
+          id="galeri"
+          className="galeri grid grid-cols-2 items-center justify-center pt-32 "
+        >
+          <div className="box ">
             <h2 className="font-bold text-3xl mb-7">Galeri</h2>
             <h1 className="font-bold text-5xl mb-7">
               Hasil
@@ -199,7 +209,7 @@ const Home = () => {
           <div className="box">
             <img
               src={asetBundel}
-              className="w-[250px] mx-auto  rounded-2xl"
+              className="w-[250px] mx-auto  mr-0 rounded-md"
               alt=""
             />
           </div>

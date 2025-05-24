@@ -7,8 +7,14 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
+import { useLocation } from "react-router-dom";
+
 function Booking() {
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const { picture, judul, harga, deskripsi } = location.state || {};
+
   return (
     <div className="w-ful">
       <div className="container px-4 mx-auto min-h-screen flex flex-col">
@@ -23,16 +29,14 @@ function Booking() {
         <div className="flex  justify-between gap-40 pt-20">
           <div className="">
             <img
-              src={asetBundel}
+              src={`http://localhost:5000/uploads/${picture}`}
               className="w-[300px] mx-auto  rounded-md"
               alt=""
             />
           </div>
           <div className="w-[600px] pb-32 ">
-            <h1 className="font-extrabold text-4xl mb-2">Repaint Full Body</h1>
-            <h2 className="font-bold text-2xl text-[#7c7c7c] mb-4">
-              Rp 1.000.000
-            </h2>
+            <h1 className="font-extrabold text-4xl mb-2">{judul}</h1>
+            <h2 className="font-bold text-2xl text-[#7c7c7c] mb-4">{harga}</h2>
             <p className="font-medium mb-4">
               Lorem ipsum dolor sit amet, consectetur adipisicing elit.
               Necessitatibus omnis ipsa voluptate commodi molestiae praesentium!

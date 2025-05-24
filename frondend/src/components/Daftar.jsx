@@ -37,16 +37,22 @@ const Daftar = () => {
 
   const handleGoogleLogin = async () => {
     try {
+      // 1. Login pakai popup Google (Firebase)
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      await axios.post("http://localhost:5000/api/auth/google-login", {
-        name: user.displayName,
-        email: user.email,
-        avatar: user.photoURL,
+      // 2. Ambil ID Token (penting untuk keamanan)
+      const idToken = await user.getIdToken();
+
+      // 3. Kirim ID Token ke backend (bukan data mentah)
+      const response = await axios.post("http://localhost:5000/google-login", {
+        token: idToken,
       });
 
-      localStorage.setItem("user", JSON.stringify(user));
+      // 4. Simpan data user (yang sudah diverifikasi backend)
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
+      // 5. Arahkan user ke halaman utama
       navigate("/");
     } catch (error) {
       console.error("Login gagal:", error);

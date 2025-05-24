@@ -1,6 +1,9 @@
 import Users from "../models/UserModels.js";
+import admin from "../controllers/firebaseAdmin.js";
 import bcrypt from "bcrypt";
 import JWT from "jsonwebtoken";
+import { OAuth2Client } from "google-auth-library";
+import { configDotenv } from "dotenv";
 
 export const getUsers = async (req, res) => {
   try {
@@ -127,22 +130,32 @@ export const logout = async (req, res) => {
 // GOOlGLE login
 
 export const googleLogin = async (req, res) => {
-  const { name, email, avatar } = req.body;
+  const { token } = req.body; // Ambil token dari body request
+
+  if (!token) {
+    return res.status(400).json({ msg: "Token is required" }); // Pastikan token ada
+  }
 
   try {
-    // Cek apakah user sudah ada
+    // Verifikasi ID token menggunakan Firebase Admin SDK
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    const { name, email, picture } = decodedToken;
+
+    // Cari atau buat user di database kamu
     let user = await Users.findOne({ where: { email } });
 
     if (!user) {
-      // Jika belum ada, buat user baru
+      // Jika user tidak ditemukan, buat user baru
       user = await Users.create({
         name,
         email,
-        avatar,
-        password: "", // kosong karena Google login tidak pakai password
+        avatar: picture, // Simpan avatar dari Firebase
+        password: "", // Kosongkan password karena menggunakan Google login
       });
     }
 
+    // Kirim response ke frontend
     res.status(200).json({ msg: "Login Google berhasil", user });
   } catch (error) {
     console.error("Google login gagal:", error);

@@ -1,22 +1,17 @@
-import { useState, useEffect } from "react";
 import mainLogo from "../assets/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "./AuthContext";
+import { useState, useEffect, useContext } from "react";
 
 const Navbar = () => {
   const navigate = useNavigate();
 
   const [scroll, setScroll] = useState(false);
   const [showDropDown, setShowDropDown] = useState(false);
-  const [user, setUser] = useState(null); // ✅ user state
-
-  useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, []);
+  const { user, logout } = useContext(AuthContext);
+  console.log("Navbar user:", user);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,19 +39,19 @@ const Navbar = () => {
           {/* Menu */}
           <ul className="flex justify-center gap-12">
             <li className="hover:font-medium hover:underline transition-all">
-              <a href="#beranda">Beranda</a>
+              <Link to="#beranda">Beranda</Link>
             </li>
             <li className="hover:font-medium hover:underline transition-all">
-              <a href="#tentang-kami">Tentang Kami</a>
+              <Link to="#tentang-kami">Tentang Kami</Link>
             </li>
             <li className="hover:font-medium hover:underline transition-all">
-              <a href="#layanan-kami">Layanan Kami</a>
+              <Link to="#layanan-kami">Layanan Kami</Link>
             </li>
             <li className="hover:font-medium hover:underline transition-all">
-              <a href="#galeri">Galeri</a>
+              <Link to="#galeri">Galeri</Link>
             </li>
             <li className="hover:font-medium hover:underline transition-all">
-              <a href="#faq">FAQ</a>
+              <Link to="#faq">FAQ</Link>
             </li>
           </ul>
 
@@ -75,7 +70,15 @@ const Navbar = () => {
                   onClick={() => setShowDropDown(!showDropDown)}
                   className="account w-12 h-12 bg-gray-400 rounded-full flex items-center justify-center hover:bg-gray-200 text-white font-bold cursor-pointer"
                 >
-                  <FontAwesomeIcon icon={faUser} />
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt="Avatar"
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <FontAwesomeIcon icon={faUser} className="text-white" />
+                  )}
                 </div>
 
                 {/* Dropdown */}
@@ -95,8 +98,7 @@ const Navbar = () => {
                     <button
                       className="block w-full text-right px-4 py-2 hover:underline"
                       onClick={() => {
-                        localStorage.removeItem("user");
-                        setUser(null);
+                        logout();
                         setShowDropDown(false);
                         navigate("/login");
                       }}

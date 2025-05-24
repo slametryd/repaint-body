@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import Footer from "../components/Footer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
@@ -7,6 +6,8 @@ import { auth, provider } from "../firebase";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
+import { AuthContext } from "./AuthContext";
+import React, { useState, useContext } from "react";
 
 function MasukLogin() {
   const [email, setEmail] = useState("");
@@ -14,19 +15,38 @@ function MasukLogin() {
   const [msg, setMsg] = useState(""); // Untuk pesan error
   const navigate = useNavigate();
 
+  const { login } = useContext(AuthContext);
+
   const handleGoogleLogin = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      const firebaseUser = result.user;
 
-      await axios.post("http://localhost:5000/google-login", {
-        name: user.displayName,
-        email: user.email,
-        avatar: user.photoURL,
-      });
+      const googleIdToken = await firebaseUser.getIdToken();
 
-      localStorage.setItem("user", JSON.stringify(user));
-      navigate("/");
+      const response = await axios.post(
+        "http://localhost:5000/google-login",
+        { token: googleIdToken },
+        { withCredentials: true }
+      );
+
+      console.log("Response data:", response.data);
+
+      const { accessToken, user: userData } = response.data;
+
+      if (accessToken && userData) {
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("user", JSON.stringify(userData));
+
+        login(userData);
+
+        alert("Login berhasil!");
+        navigate("/");
+      } else {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("user");
+        alert("Login gagal, data user tidak lengkap.");
+      }
     } catch (error) {
       console.error("Login gagal:", error);
       alert("Login gagal. Coba lagi.");
@@ -40,11 +60,22 @@ function MasukLogin() {
       return;
     }
     try {
-      await axios.post("http://localhost:5000/login", {
-        email,
-        password,
-      });
-      localStorage.setItem("user", JSON.stringify({ email })); // Simpan user
+      const response = await axios.post(
+        "http://localhost:5000/login",
+        { email, password },
+        { withCredentials: true }
+      );
+      const { accessToken, user: userData } = response.data;
+
+      if (userData) {
+        localStorage.setItem("user", JSON.stringify(userData));
+        login(userData);
+      } else {
+        localStorage.removeItem("user");
+      }
+
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("user", JSON.stringify(userData));
       navigate("/");
     } catch (error) {
       if (error.response && error.response.data.msg) {
