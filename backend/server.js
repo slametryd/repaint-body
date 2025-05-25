@@ -8,6 +8,7 @@ import productRoutes from "./controllers/product_rout.js";
 import bookingRoutes from "./controllers/booking_routes.js";
 import motorOptions from "./controllers/motorOptions.js";
 import paymentRoutes from "./controllers/payment.js";
+import emailRoutes from "./controllers/nodemailer.js";
 
 dotEnv.config();
 const app = express();
@@ -28,6 +29,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api", bookingRoutes); // di file server.js
 app.use("/api", motorOptions);
 app.use("/api", paymentRoutes);
+app.use("/api", emailRoutes);
 
 try {
   await db.authenticate();

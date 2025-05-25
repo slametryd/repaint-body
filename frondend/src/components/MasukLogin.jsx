@@ -30,8 +30,6 @@ function MasukLogin() {
         { withCredentials: true }
       );
 
-      console.log("Response data:", response.data);
-
       const { accessToken, user: userData } = response.data;
 
       if (accessToken && userData) {
@@ -40,7 +38,6 @@ function MasukLogin() {
 
         login(userData);
 
-        alert("Login berhasil!");
         navigate("/");
       } else {
         localStorage.removeItem("accessToken");

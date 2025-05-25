@@ -53,7 +53,7 @@ const Daftar = () => {
       localStorage.setItem("user", JSON.stringify(response.data.user));
 
       // 5. Arahkan user ke halaman utama
-      navigate("/");
+      navigate("/login");
     } catch (error) {
       console.error("Login gagal:", error);
       alert("Login gagal. Coba lagi.");
@@ -138,7 +138,13 @@ const Daftar = () => {
           <div className="flex justify-center items-center my-4">
             <p>
               <Link className="hover:border-b-2" to="/">
-                Sudah punya akun? Login
+                Sudah punya akun?{" "}
+                <span
+                  onClick={() => navigate(`/login`)}
+                  className="text-red-500 font-bold cursor-pointer hover:border-b-2"
+                >
+                  login
+                </span>
               </Link>
             </p>
           </div>

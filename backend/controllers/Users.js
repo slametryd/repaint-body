@@ -130,33 +130,58 @@ export const logout = async (req, res) => {
 // GOOlGLE login
 
 export const googleLogin = async (req, res) => {
-  const { token } = req.body; // Ambil token dari body request
-
-  if (!token) {
-    return res.status(400).json({ msg: "Token is required" }); // Pastikan token ada
-  }
+  const { token } = req.body;
+  if (!token) return res.status(400).json({ msg: "Token is required" });
 
   try {
-    // Verifikasi ID token menggunakan Firebase Admin SDK
     const decodedToken = await admin.auth().verifyIdToken(token);
-
     const { name, email, picture } = decodedToken;
 
-    // Cari atau buat user di database kamu
     let user = await Users.findOne({ where: { email } });
-
     if (!user) {
-      // Jika user tidak ditemukan, buat user baru
       user = await Users.create({
         name,
         email,
-        avatar: picture, // Simpan avatar dari Firebase
-        password: "", // Kosongkan password karena menggunakan Google login
+        avatar: picture,
+        password: "",
       });
     }
 
-    // Kirim response ke frontend
-    res.status(200).json({ msg: "Login Google berhasil", user });
+    const userId = user.id;
+
+    const accessToken = JWT.sign(
+      { userId, name: user.name, email: user.email },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    const refreshToken = JWT.sign(
+      { userId, name: user.name, email: user.email },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    await Users.update(
+      { refresh_token: refreshToken },
+      { where: { id: userId } }
+    );
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).json({
+      msg: "Login Google berhasil",
+      accessToken,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatar: user.avatar,
+      },
+    });
   } catch (error) {
     console.error("Google login gagal:", error);
     res.status(500).json({ msg: "Gagal login dengan Google" });

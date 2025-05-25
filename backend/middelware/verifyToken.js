@@ -20,6 +20,7 @@ export const googleLogin = async (req, res) => {
         password: "",
       });
     }
+    console.log("Access Token Secret:", process.env.ACCESS_TOKEN_SECRET);
 
     const userId = user.id;
     const accessToken = JWT.sign(
@@ -44,11 +45,11 @@ export const googleLogin = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 hari
     });
-
-    // Kirim akses token dan user ke frontend
+    console.log("Access Token:", accessToken);
     res.status(200).json({
       msg: "Login Google berhasil",
       accessToken,
+      // <- ini harus ada
       user: {
         id: user.id,
         name: user.name,
@@ -59,32 +60,6 @@ export const googleLogin = async (req, res) => {
   } catch (error) {
     console.error("Google login gagal:", error);
     res.status(500).json({ msg: "Gagal login dengan Google" });
-  }
-};
-
-// Endpoint untuk refresh token, generate access token baru
-export const refreshToken = async (req, res) => {
-  try {
-    const token = req.cookies.refreshToken;
-    if (!token) return res.sendStatus(401);
-
-    const user = await Users.findOne({ where: { refresh_token: token } });
-    if (!user) return res.sendStatus(403);
-
-    JWT.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, decoded) => {
-      if (err) return res.sendStatus(403);
-
-      const accessToken = JWT.sign(
-        { userId: user.id, name: user.name, email: user.email },
-        process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: "15m" }
-      );
-
-      res.json({ accessToken });
-    });
-  } catch (error) {
-    console.error(error);
-    res.sendStatus(500);
   }
 };
 

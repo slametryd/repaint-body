@@ -36,8 +36,6 @@ const Home = () => {
   const [produk, setProduk] = useState([]);
   const { user } = useContext(AuthContext);
 
-  console.log("HomePage user:", user); // cek user di sini
-
   // Mengambil produk dari server saat halaman dimuat
   useEffect(() => {
     const fetchProduk = async () => {
