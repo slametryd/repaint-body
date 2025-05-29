@@ -18,6 +18,7 @@ function Booking() {
   const [warna, setWarna] = useState("");
   const [qty, setQty] = useState(1);
   const { picture, judul, harga, deskripsi } = location.state || {};
+  const today = new Date().toISOString().split("T")[0];
 
   // State untuk menampung data dari backend
   const [motorOptions, setMotorOptions] = useState([]);
@@ -104,6 +105,7 @@ function Booking() {
               <label className="mb-2">Pilih tangal booking</label>
               <input
                 type="date"
+                min={today}
                 value={tanggal}
                 onChange={(e) => setTanggal(e.target.value)}
                 className="outline-0 border-b-2"
