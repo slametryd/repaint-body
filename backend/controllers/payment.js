@@ -4,7 +4,7 @@ import midtransClient from "midtrans-client";
 const router = express.Router();
 
 const snap = new midtransClient.Snap({
-  isProduction: false, // true untuk mode live
+  isProduction: false,
   serverKey: "SB-Mid-server-SZqlmFjsOEBfj5YGDVrDvxyu",
 });
 

@@ -24,7 +24,7 @@ const Navbar = () => {
 
   const scrollActive = scroll ? "shadow-lg" : "";
   const scroll_profile = scroll ? "" : "";
-
+  console.log("Avatar src:", user?.avatar);
   return (
     <div className="navbar fixed w-full transition-all py-4 z-50 bg-transparent">
       <div className="container mx-auto px-4">
@@ -74,7 +74,7 @@ const Navbar = () => {
                     <img
                       src={user.avatar}
                       alt="Avatar"
-                      className="w-full h-full object-cover rounded-full"
+                      className="w-full h-full object-cover border-2 border-red-700 rounded-full"
                     />
                   ) : (
                     <FontAwesomeIcon icon={faUser} className="text-white" />
@@ -89,7 +89,6 @@ const Navbar = () => {
                     <button
                       className="block w-full text-right px-4 py-2 mt-8 hover:underline"
                       onClick={() => {
-                        // navigate("/akun");
                         setShowDropDown(false); // Close dropdown after click
                       }}
                     >

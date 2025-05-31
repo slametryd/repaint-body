@@ -23,7 +23,7 @@ function DetailBooking() {
     jenis_motor,
     warna,
     qty,
-    total_harga, // Ambil total_harga dari location.state
+    total_harga,
   } = location.state || {};
 
   const formatRupiah = (angka) => {
@@ -35,7 +35,7 @@ function DetailBooking() {
 
   const initiatePayment = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem("user")); // ambil dari localStorage
+      const user = JSON.parse(localStorage.getItem("user"));
       const userEmail = user?.email || "fallback@example.com"; // email fallback jika null
 
       // Lanjut ke pembayaran Midtrans
@@ -69,7 +69,7 @@ function DetailBooking() {
             },
           });
 
-          navigate("/pembayaran-berhasil", { state: { result } });
+          navigate("/", { state: { result } });
         },
 
         onPending: async function (result) {

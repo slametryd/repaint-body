@@ -34,7 +34,7 @@ const Home = () => {
   const navigate = useNavigate();
   const [actived, setActived] = useState(null);
   const [produk, setProduk] = useState([]);
-  const { user } = useContext(AuthContext);
+  const { user, login } = useContext(AuthContext);
 
   // Mengambil produk dari server saat halaman dimuat
   useEffect(() => {
@@ -244,7 +244,7 @@ const Home = () => {
               {actived === i && (
                 <div className="isi-faq transition-all px-6 pb-4 rounded-2xl   text-gray-600">
                   {item.description.split(`\n`).map((line, i) => (
-                    <p key={i} clasName="">
+                    <p key={i} className="">
                       {" "}
                       {line}
                     </p>
