@@ -15,15 +15,17 @@ function DetailBooking() {
   const userEmail = user?.email || "email-default@example.com";
 
   const {
-    picture,
-    judul,
-    harga,
-    deskripsi,
-    tanggal,
-    jenis_motor,
-    warna,
-    qty,
-    total_harga,
+    picture = "",
+    judul = "",
+    harga = 0,
+    deskripsi = "",
+    tanggal = "",
+    jenis_motor = "",
+    warna = "",
+    qty = 1,
+    total_harga = 0,
+    nama = "",
+    noWa = 0,
   } = location.state || {};
 
   const formatRupiah = (angka) => {
@@ -36,11 +38,26 @@ function DetailBooking() {
   const initiatePayment = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      const userEmail = user?.email || "fallback@example.com"; // email fallback jika null
+      const userEmail = user?.email || "fallback@example.com";
 
-      // Lanjut ke pembayaran Midtrans
+      const order_id = `ORDER-${Date.now()}`;
+
+      await axios.post("http://localhost:5000/api/bookings", {
+        nama,
+        noWa,
+        tanggal,
+        jenis_motor,
+        warna,
+        qty,
+        produkId: location.state.produkId,
+        total_harga,
+        status_pembayaran: "pending",
+        order_id,
+      });
+
+      // Ambil Snap Token dari Midtrans
       const res = await axios.post("http://localhost:5000/api/payment-token", {
-        order_id: `ORDER-${Date.now()}`,
+        order_id,
         gross_amount: total_harga,
         name: user?.name || "Customer Default",
         email: userEmail,
@@ -54,6 +71,8 @@ function DetailBooking() {
           console.log("Success", result);
 
           await axios.post("http://localhost:5000/api/send-email", {
+            nama,
+            noWa,
             judul,
             tanggal,
             jenis_motor,
@@ -69,7 +88,13 @@ function DetailBooking() {
             },
           });
 
-          navigate("/", { state: { result } });
+          await axios.put(
+            `http://localhost:5000/api/booking-status/${result.order_id}`,
+            {
+              status: result.transaction_status,
+            }
+          );
+          navigate("/");
         },
 
         onPending: async function (result) {
@@ -77,6 +102,8 @@ function DetailBooking() {
           console.log("Pending", result);
 
           await axios.post("http://localhost:5000/api/send-email", {
+            nama,
+            noWa,
             judul,
             tanggal,
             jenis_motor,
@@ -104,7 +131,7 @@ function DetailBooking() {
       });
     } catch (error) {
       console.error("Error:", error);
-      alert("Gagal mengirim email atau memulai pembayaran.");
+      alert("Gagal memulai pembayaran atau menyimpan data.");
     }
   };
 
@@ -118,9 +145,9 @@ function DetailBooking() {
 
   return (
     <div className="flex flex-col min-h-screen w-full">
-      <div className="container px-4 mx-auto mb-20 flex-grow ">
-        <div className="">
-          <h1 className="font-extrabold text-2xl  my-7 ">
+      <div className="container px-4 sm:px-6 lg:px-8 mx-auto mb-20 flex-grow">
+        <div>
+          <h1 className="font-extrabold text-2xl my-7">
             <span
               onClick={() => navigate(`/booking`)}
               className="cursor-pointer pr-3"
@@ -131,50 +158,88 @@ function DetailBooking() {
           </h1>
         </div>
         <div className="pt-20 mb-32">
-          <h1 className="font-extrabold text-5xl">Detail pesanan</h1>
+          <h1 className="font-extrabold text-3xl sm:text-4xl md:text-5xl">
+            Detail pesanan
+          </h1>
         </div>
-        <div className="flex  justify-between items-center h-full   bg-[#d3d3d3] px-6 py-3 rounded-full ">
-          <div>
-            <h1 className="font-bold  text-[20px]">Product</h1>
+
+        <div className="hidden sm:flex flex-col">
+          <div className="flex justify-between items-center bg-[#d3d3d3] px-4 py-3 rounded-full">
+            <h1 className="font-bold text-[20px] w-1/3">Product</h1>
+            <h1 className="font-bold text-[20px] w-1/3 text-center">
+              Quantity
+            </h1>
+            <h1 className="font-bold text-[20px] w-1/3 text-right">Harga</h1>
           </div>
-          <div>
-            <h1 className="font-bold  text-[20px]">Quantity</h1>
-          </div>
-          <div>
-            <h1 className="font-bold  text-[20px]">Harga</h1>
+          <div className="flex justify-between items-center px-4 py-5 border-b">
+            <div className="w-1/3 space-y-1">
+              <h1 className="font-bold text-[18px]">{judul}</h1>
+              <p>Nama Customer : {nama}</p>
+              <p>No WA : {noWa}</p>
+              <p>Tgl Booking : {tanggal}</p>
+              <p>Jenis Motor : {jenis_motor}</p>
+              <p>Warna : {warna}</p>
+            </div>
+            <div className="w-1/3 text-center text-lg font-semibold">{qty}</div>
+            <div className="w-1/3 text-right text-lg font-semibold">
+              {formatRupiah(total_harga)}
+            </div>
           </div>
         </div>
-        <div className=" flex  justify-between items-center h-full px-6 py-3 ">
-          <div>
-            <h1 className="font-bold text-[20px]">{judul}</h1>
-            <p>Tangal Booking : {tanggal}</p>
-            <p>Jenis Motor : {jenis_motor}</p>
-            <p>Warna yang dipilih : {warna}</p>
+
+        <div className="sm:hidden px-4 py-3 shadow-lg rounded-lg mb-6 space-y-3">
+          <div className="flex justify-between">
+            <span className="font-bold">Product</span>
+            <span>{judul}</span>
           </div>
-          <div>
-            <p>{qty}</p>
+          <div className="flex justify-between">
+            <span className="font-bold">Nama</span>
+            <span>{nama}</span>
           </div>
-          <div>
-            <p>{formatRupiah(total_harga)}</p>
+          <div className="flex justify-between">
+            <span className="font-bold">No WA</span>
+            <span>{noWa}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-bold">Tanggal</span>
+            <span>{tanggal}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-bold">Jenis Motor</span>
+            <span>{jenis_motor}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-bold">Warna</span>
+            <span>{warna}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-bold">Quantity</span>
+            <span>{qty}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-bold">Harga</span>
+            <span>{formatRupiah(total_harga)}</span>
           </div>
         </div>
-        <div className="pt-14 flex  justify-between items-center h-full">
+
+        {/* Payment button section */}
+        <div className="pt-14 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div>
-            <p className="px-6 py-3 font-bold  text-[20px]">
-              Pilih Metode Pembayaran <span></span>
+            <p className="px-6 py-3 font-bold text-[18px] sm:text-[20px] text-center sm:text-left">
+              Pilih Metode Pembayaran
             </p>
           </div>
-          <div className="">
+          <div className="px-4 w-full sm:w-auto">
             <button
               onClick={initiatePayment}
-              className="bg-[#FD1E0D] font-medium px-5 py-2 rounded-md font text-white hover:bg-[#ED1100] transition-all mb-2"
+              className="w-full sm:w-auto bg-[#FD1E0D] font-medium px-5 py-2 rounded-full text-white hover:bg-[#ED1100] transition-all"
             >
               Bayar
             </button>
           </div>
         </div>
       </div>
-      <div className="">
+      <div>
         <Footer />
       </div>
     </div>

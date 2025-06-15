@@ -13,10 +13,13 @@ const Product = sequelize.define(
     harga: DataTypes.INTEGER,
     deskripsi: DataTypes.STRING,
     picture: DataTypes.STRING,
+    status: DataTypes.STRING,
+    LastUpdateBy: DataTypes.STRING,
+    LastUpdateDate: DataTypes.STRING,
   },
   {
     tableName: "product",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

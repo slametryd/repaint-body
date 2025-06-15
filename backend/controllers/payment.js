@@ -1,5 +1,6 @@
 import express from "express";
 import midtransClient from "midtrans-client";
+import Booking from "../models/booking.js";
 
 const router = express.Router();
 
@@ -8,17 +9,18 @@ const snap = new midtransClient.Snap({
   serverKey: "SB-Mid-server-SZqlmFjsOEBfj5YGDVrDvxyu",
 });
 
+//Snap Token
 router.post("/payment-token", async (req, res) => {
   const { order_id, gross_amount, name, email } = req.body;
 
   const parameter = {
     transaction_details: {
-      order_id: order_id,
-      gross_amount: gross_amount,
+      order_id,
+      gross_amount,
     },
     customer_details: {
       first_name: name,
-      email: email,
+      email,
     },
   };
 
@@ -30,4 +32,26 @@ router.post("/payment-token", async (req, res) => {
     res.status(500).json({ error: "Gagal membuat token pembayaran" });
   }
 });
+
+router.put("/api/bookings/:order_id", async (req, res) => {
+  const { order_id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const result = await Booking.update(
+      { status_pembayaran: status },
+      { where: { order_id } }
+    );
+
+    if (result[0] === 0) {
+      return res.status(404).json({ message: "Booking tidak ditemukan" });
+    }
+
+    res.json({ message: "Status pembayaran berhasil diperbarui" });
+  } catch (error) {
+    console.error("Gagal update status pembayaran:", error);
+    res.status(500).json({ message: "Gagal update status pembayaran" });
+  }
+});
+
 export default router;

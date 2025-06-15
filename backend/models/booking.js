@@ -26,7 +26,7 @@ const Booking = db.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "product", // nama tabel (bukan model)
+        model: "product", // 🔍 nama tabel, bukan nama model
         key: "id",
       },
     },
@@ -34,10 +34,39 @@ const Booking = db.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    status_pembayaran: {
+      type: DataTypes.STRING,
+      allowNull: true, // bisa "pending", "settlement", dll
+    },
+    order_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true, // Midtrans perlu order_id unik
+    },
+    nama: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    noWa: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lastUpdateBy: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lastUpdateDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "booking",
-    timestamps: false,
+    timestamps: true,
   }
 );
 

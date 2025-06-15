@@ -8,10 +8,22 @@ const WarnaMotor = db.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    lastUpdateBy: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lastUpdateDate: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
   {
     tableName: "warna_motor", // Sesuaikan dengan nama tabel asli
-    timestamps: false, // Nonaktifkan createdAt & updatedAt
+    timestamps: true, // Nonaktifkan createdAt & updatedAt
     freezeTableName: true, // Jangan ubah nama tabel jadi jamak
   }
 );

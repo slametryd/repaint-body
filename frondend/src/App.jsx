@@ -8,6 +8,7 @@ import DetailBookingPage from "./pages/DetailBookingPage";
 import DetailProduct from "./pages/DetailProduct";
 import AdminPage from "./pages/AdminPage";
 import { AuthProvider } from "./components/AuthContext"; // path sesuai struktur kamu
+import AdminRoute from "./components/adminRoute";
 
 function App() {
   return (
@@ -20,7 +21,14 @@ function App() {
           <Route path="/booking" element={<BookingPage />} />
           <Route path="/detailbooking" element={<DetailBookingPage />} />
           <Route path="/detailproduct" element={<DetailProduct />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminPage />
+              </AdminRoute>
+            }
+          />
         </Routes>
       </Router>
     </AuthProvider>

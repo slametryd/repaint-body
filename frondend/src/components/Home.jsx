@@ -9,8 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { AuthContext } from "./AuthContext";
-import React, { useEffect, useState, useContext } from "react";
-
+import React, { useEffect, useState, useContext, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios"; // Menggunakan axios untuk mengambil data dari API
 
 const FAQ = [
@@ -30,11 +30,21 @@ const FAQ = [
   },
 ];
 
-const Home = () => {
+const Home = ({ sectionRefs }) => {
   const navigate = useNavigate();
   const [actived, setActived] = useState(null);
   const [produk, setProduk] = useState([]);
   const { user, login } = useContext(AuthContext);
+  const location = useLocation();
+
+  const { berandaRef, tentangKamiRef, layananKamiRef, galeriRef, faqRef } =
+    sectionRefs;
+
+  useEffect(() => {
+    if (location.state?.result) {
+      alert("Pembayaran berhasil!");
+    }
+  }, [location.state]);
 
   // Mengambil produk dari server saat halaman dimuat
   useEffect(() => {
@@ -101,44 +111,48 @@ const Home = () => {
     <div id="beranda" className="home-page pb-10">
       <div className="container px-4 mx-auto">
         <div
-          className="hero grid
-        grid-cols-2 pt-32 items-center gap-20"
+          ref={berandaRef}
+          className="hero grid 
+        md:grid-cols-2 grid-cols-1 pt-32 items-center gap-10 md:gap-20"
         >
           <div className="box ">
-            <h1 className="font-extrabold text-5xl mb-7">
+            <h1 className="font-extrabold text-3xl md:text-5xl  md:mb-7">
               Bikin Motor Kamu Tampil Beda dengan Repaint{" "}
               <span className="text-[#FD1E0D]">Berkualitas!</span>
             </h1>
-            <p className="mb-7 font-medium">
+            <p className="mb-4 md:mb-7  md:font-medium font-normal">
               Spesialis cat ulang body motor dengan hasil halus,
               <br /> warna tajam, dan tahan lama
             </p>
             <a
               href="#layanan-kami"
-              className="bg-[#FD1E0D] font-medium text-center px-3 py-2 rounded-md font text-white hover:bg-[#ED1100] transition-all "
+              className="bg-[#FD1E0D] font-medium text-center px-3 py-2 rounded-full font text-white hover:bg-[#ED1100] transition-all "
             >
               Lihat Detail
             </a>
           </div>
           <div className="box">
-            <img src={heroImg} className="w-[537px] h-[422px]" alt="" />
+            <img src={heroImg} className="w-[537px] h-auto mx-auto" alt="" />
           </div>
         </div>
 
         <div
+          ref={tentangKamiRef}
           id="tentang-kami"
-          className=" grid grid-cols-2  items-center justify-center pt-32"
+          className="grid md:grid-cols-2 grid-cols-1 items-center justify-center pt-32 gap-10 "
         >
-          <div className=" ">
+          <div className="order-1 md:order-none ">
             <img
               src={fotoAll}
-              className="w-[380px] justify-center mx-auto ml-0 rounded-2xl"
+              className="w-[380px] justify-center mx-auto rounded-2xl"
               alt=""
             />
           </div>
           <div className="box ">
-            <h2 className="font-bold text-3xl mb-7">Tentang Kami</h2>
-            <h1 className="font-bold text-5xl mb-7">
+            <h2 className="font-bold text-3xl  md:text-left text-center mb-7">
+              Tentang Kami
+            </h2>
+            <h1 className="font-extrabold text-3xl md:text-5xl  md:mb-7">
               Kami Bukan Sekadar Bengkel, Kami{" "}
               <span className="text-[#FD1E0D]">Seniman Warna</span> untuk Motor
               Kamu!
@@ -152,7 +166,11 @@ const Home = () => {
           </div>
         </div>
 
-        <div id="layanan-kami" className="layanan-kami pt-32">
+        <div
+          ref={layananKamiRef}
+          id="layanan-kami"
+          className="layanan-kami pt-32"
+        >
           <h2
             className="font-bold text-3xl mb-4 text-center
           "
@@ -162,15 +180,15 @@ const Home = () => {
           <p className="mb-7 font-medium text-center">
             Apakah kamu ingin tampilan motor yang klasik, elegan, atau nyentrik?{" "}
           </p>
-          <div className="card-box  flex gap-8 items-center justify-between ">
+          <div className="card-box flex flex-wrap gap-8 items-center justify-center">
             {produk.map((item) => (
               <div
                 key={item.id}
-                className="box rounded-md w-[400px] pb-7 shadow-md "
+                className="box rounded-md max-w-[400px] pb-7 shadow-md "
               >
                 <img
                   src={`http://localhost:5000/uploads/${item.picture}`}
-                  className="w-[400px] rounded-t-md mb-5 "
+                  className="w-[400px] h-[200px] object-cover rounded-t-md mb-5 "
                   alt=""
                 />
                 <h3 className="font-bold text-[20px] px-4 ">{item.judul}</h3>
@@ -189,12 +207,15 @@ const Home = () => {
           </div>
         </div>
         <div
+          ref={galeriRef}
           id="galeri"
-          className="galeri grid grid-cols-2 items-center justify-center pt-32 "
+          className="galeri grid md:grid-cols-2 grid-cols-1 items-center justify-center pt-32 gap-10"
         >
           <div className="box ">
-            <h2 className="font-bold text-3xl mb-7">Galeri</h2>
-            <h1 className="font-bold text-5xl mb-7">
+            <h2 className="font-bold text-3xl text-center md:text-left mb-7">
+              Galeri
+            </h2>
+            <h1 className="font-extrabold text-3xl md:text-5xl  md:mb-7">
               Hasil
               <span className="text-[#FD1E0D]">Repaint Terbaik</span>dari
               Bengkel Kami
@@ -207,13 +228,13 @@ const Home = () => {
           <div className="box">
             <img
               src={asetBundel}
-              className="w-[250px] mx-auto  mr-0 rounded-md"
+              className="w-[250px] mx-auto rounded-md"
               alt=""
             />
           </div>
         </div>
 
-        <div id="faq" className="faq pt-32 ">
+        <div ref={faqRef} id="faq" className="faq pt-32 px-4">
           <div className="box ">
             <h2 className="font-bold text-3xl mb-7 text-center ">FAQ</h2>
 

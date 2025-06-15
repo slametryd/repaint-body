@@ -1,14 +1,19 @@
 import express from "express";
 import Booking from "../models/booking.js";
 import Product from "../models/Product.js";
+import { now } from "sequelize/lib/utils";
 
 const router = express.Router();
 
-// ✅ GET /booking - ambil semua data booking
+// (async () => {
+//   await Booking.sync({ alter: true }); // akan menyesuaikan tabel dengan model terbaru, menambah kolom baru jika belum ada
+//   console.log("Booking table updated!");
+// })();
+
 router.get("/booking", async (req, res) => {
   try {
     const bookings = await Booking.findAll({
-      include: Product, // mengambil data produk terkait
+      include: Product,
     });
 
     res.json(bookings);
@@ -18,11 +23,28 @@ router.get("/booking", async (req, res) => {
   }
 });
 
-// ✅ POST /bookings - buat data booking baru
 router.post("/bookings", async (req, res) => {
-  const { tanggal, jenis_motor, warna, qty, produkId } = req.body;
+  const {
+    tanggal,
+    jenis_motor,
+    warna,
+    qty,
+    produkId,
+    order_id,
+    status_pembayaran,
+    nama,
+    noWa,
+  } = req.body;
 
-  if (!tanggal || !jenis_motor || !warna || !qty || !produkId) {
+  if (
+    !tanggal ||
+    !jenis_motor ||
+    !warna ||
+    !qty ||
+    !produkId ||
+    !nama ||
+    !noWa
+  ) {
     return res.status(400).json({ error: "Semua kolom harus diisi." });
   }
 
@@ -41,20 +63,15 @@ router.post("/bookings", async (req, res) => {
       qty,
       total_harga,
       produkId,
+      order_id,
+      status_pembayaran,
+      nama,
+      noWa,
+      lastUpdateBy: req.user?.name || " ",
+      lastUpdateDate: new Date(),
     });
 
-    res.status(201).json({
-      message: "Booking berhasil disimpan.",
-      booking: {
-        id: booking.id,
-        tanggal: booking.tanggal,
-        jenis_motor: booking.jenis_motor,
-        warna: booking.warna,
-        qty: booking.qty,
-        total_harga: booking.total_harga,
-        produkId: booking.produkId,
-      },
-    });
+    res.status(201).json({ message: "Booking berhasil", booking });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Gagal menyimpan booking." });

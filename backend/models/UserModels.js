@@ -24,6 +24,22 @@ const Users = db.define(
     avatar: {
       type: DataTypes.STRING,
     },
+    role: {
+      type: DataTypes.STRING,
+      defaultValue: "user", // bisa 'admin' atau 'user'
+    },
+    lastUpdateBy: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    lastUpdateDate: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
   {
     freezeTableName: true,

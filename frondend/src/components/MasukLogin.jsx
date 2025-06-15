@@ -65,15 +65,20 @@ function MasukLogin() {
       const { accessToken, user: userData } = response.data;
 
       if (userData) {
+        localStorage.setItem("accessToken", accessToken);
         localStorage.setItem("user", JSON.stringify(userData));
         login(userData);
+
+        if (userData.role === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/");
+        }
       } else {
         localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        alert("Login gagal, data user tidak lengkap.");
       }
-
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("user", JSON.stringify(userData));
-      navigate("/");
     } catch (error) {
       if (error.response && error.response.data.msg) {
         setMsg(error.response.data.msg);
@@ -84,63 +89,62 @@ function MasukLogin() {
   };
 
   return (
-    <div className="w-full h-screen">
-      <div className="flex justify-center items-center h-full ">
+    <div className="flex flex-col justify-between min-h-screen">
+      <div className="flex justify-center items-center flex-grow px-4 sm:px-6 lg:px-8 py-10">
         <form
           onSubmit={Auth}
-          className="max-w-[400px]  border-2 rounded-2xl  px-4 "
+          className="w-full max-w-md bg-white shadow-lg rounded-2xl px-6 py-8"
         >
-          <h1 className="font-extrabold text-5xl my-7 text-center">Login</h1>
-          {msg && <p className="text-red-500 text-center">{msg}</p>}
-          <div className="flex flex-col justify-center mb-4">
-            <label className="mb-2">Email</label>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-center mb-6">
+            Login
+          </h1>
+          {msg && <p className="text-red-500 text-center mb-4">{msg}</p>}
+          <div className="mb-4">
+            <label className="block mb-1">Email</label>
             <input
-              className="outline-0 border-b-2"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border-b-2 outline-none bg-none"
             />
           </div>
-          <div className="flex flex-col justify-center mb-4">
-            <label className="mb-2">Password</label>
+          <div className="mb-4">
+            <label className="block mb-1">Password</label>
             <input
-              className="outline-0 border-b-2"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border-b-2 outline-none"
             />
           </div>
-          <div className="text-center">
+          <div className="text-center mb-4">
             <button
               type="submit"
-              className="bg-[#FD1E0D] font-medium px-5 py-2 rounded-full font text-white hover:bg-[#ED1100] transition-all mb-2"
+              className="w-full bg-[#FD1E0D] hover:bg-[#ED1100] text-white font-medium py-2 rounded-full transition-all"
             >
               Login
             </button>
-            <p className="text-[#808080] mb-2"> Atau login dengan Google</p>
+            <p className="text-gray-500 mt-3">Atau login dengan Google</p>
             <button
               type="button"
-              className="bg-[#DFDFDF] font-medium px-5 py-2 rounded-full font text-white hover:bg-[#808080] transition-all mb-2"
               onClick={handleGoogleLogin}
+              className="w-full mt-2 bg-[#DFDFDF] hover:bg-[#808080] hover:text-white text-black font-medium py-2 rounded-full flex items-center justify-center gap-2 transition-all"
             >
-              <span className="pr-3 cursor-pointer">
-                <FontAwesomeIcon icon={faGoogle} />
-              </span>
-              Gunakan google akun
+              <FontAwesomeIcon icon={faGoogle} />
+              Gunakan akun Google
             </button>
           </div>
-          <div className="flex justify-center items-center gap-20 my-7 ">
-            <p className="">
-              <Link className="hover:border-b-2" to="/forgot-password">
+          <div className="text-sm text-center mt-4 space-y-2">
+            <p>
+              <Link to="/" className="text-blue-500 hover:underline">
                 Lupa password?
               </Link>
             </p>
-            <p className="text-right">
-              {" "}
-              Belum punya akun?
+            <p>
+              Belum punya akun?{" "}
               <span
                 onClick={() => navigate(`/signup`)}
-                className="text-red-500 font-bold cursor-pointer hover:border-b-2"
+                className="text-red-500 font-semibold cursor-pointer hover:underline"
               >
                 Signup
               </span>
@@ -148,9 +152,7 @@ function MasukLogin() {
           </div>
         </form>
       </div>
-      <div>
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }

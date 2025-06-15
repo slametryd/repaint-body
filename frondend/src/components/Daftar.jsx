@@ -61,20 +61,22 @@ const Daftar = () => {
   };
 
   return (
-    <div className="w-full h-screen">
-      <div className="flex justify-center items-center h-full">
-        <form onSubmit={Register} className=" border-2 rounded-2xl px-4 ">
-          <h1 className="w-[400px] font-extrabold text-5xl my-7 text-center">
+    <div className="flex flex-col justify-between min-h-screen">
+      <div className="flex justify-center items-center flex-grow px-4 sm:px-6 py-10">
+        <form
+          onSubmit={Register}
+          className="w-full max-w-md bg-white shadow-lg rounded-2xl px-6 py-8"
+        >
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-center mb-6">
             Sign Up
           </h1>
 
-          {/* Tampilkan pesan error */}
           {msg && <p className="text-red-500 text-center mb-4">{msg}</p>}
 
-          <div className="flex flex-col justify-center mb-4">
-            <label className="mb-2">Nama</label>
+          <div className="mb-4">
+            <label className="block mb-1">Nama</label>
             <input
-              className="outline-0 border-b-2"
+              className="w-full px-3 py-2 border-b-2 outline-none"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -82,10 +84,10 @@ const Daftar = () => {
             />
           </div>
 
-          <div className="flex flex-col justify-center mb-4">
-            <label className="mb-2">Email</label>
+          <div className="mb-4">
+            <label className="block mb-1">Email</label>
             <input
-              className="outline-0 border-b-2"
+              className="w-full px-3 py-2 border-b-2 outline-none"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -93,10 +95,10 @@ const Daftar = () => {
             />
           </div>
 
-          <div className="flex flex-col justify-center mb-4">
-            <label className="mb-2">Password</label>
+          <div className="mb-4">
+            <label className="block mb-1">Password</label>
             <input
-              className="outline-0 border-b-2"
+              className="w-full px-3 py-2 border-b-2 outline-none"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -104,10 +106,10 @@ const Daftar = () => {
             />
           </div>
 
-          <div className="flex flex-col justify-center mb-4">
-            <label className="mb-2">Konfirmasi Password</label>
+          <div className="mb-6">
+            <label className="block mb-1">Konfirmasi Password</label>
             <input
-              className="outline-0 border-b-2"
+              className="w-full px-3 py-2 border-b-2 outline-none"
               type="password"
               value={confPassword}
               onChange={(e) => setConfPassword(e.target.value)}
@@ -115,44 +117,38 @@ const Daftar = () => {
             />
           </div>
 
-          <div className="text-center">
+          <div className="text-center mb-4">
             <button
               type="submit"
-              className="bg-[#FD1E0D] font-medium px-5 py-2 rounded-full text-white hover:bg-[#ED1100] transition-all mb-2"
+              className="w-full bg-[#FD1E0D] hover:bg-[#ED1100] text-white font-medium py-2 rounded-full transition-all"
             >
               Sign Up
             </button>
-            <p className="text-[#808080] mb-2">Atau daftar dengan Google</p>
+            <p className="text-gray-500 mt-3">Atau daftar dengan Google</p>
             <button
               onClick={handleGoogleLogin}
               type="button"
-              className="bg-[#DFDFDF] font-medium px-5 py-2 rounded-full font text-white hover:bg-[#808080] transition-all "
+              className="w-full mt-2 bg-[#DFDFDF] hover:bg-[#808080] hover:text-white text-black font-medium py-2 rounded-full flex items-center justify-center gap-2 transition-all"
             >
-              <span className="pr-3 cursor-pointer">
-                <FontAwesomeIcon icon={faGoogle} />
-              </span>{" "}
+              <FontAwesomeIcon icon={faGoogle} />
               Gunakan akun Google
             </button>
           </div>
 
-          <div className="flex justify-center items-center my-4">
+          <div className="text-sm text-center mt-4">
             <p>
-              <Link className="hover:border-b-2" to="/">
-                Sudah punya akun?{" "}
-                <span
-                  onClick={() => navigate(`/login`)}
-                  className="text-red-500 font-bold cursor-pointer hover:border-b-2"
-                >
-                  login
-                </span>
-              </Link>
+              Sudah punya akun?{" "}
+              <span
+                onClick={() => navigate("/login")}
+                className="text-red-500 font-semibold cursor-pointer hover:underline"
+              >
+                Login
+              </span>
             </p>
           </div>
         </form>
       </div>
-      <div className="mt-7">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 };

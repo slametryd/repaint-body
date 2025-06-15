@@ -1,17 +1,23 @@
 import mainLogo from "../assets/logo.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faBars, faL } from "@fortawesome/free-solid-svg-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "./AuthContext";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 
-const Navbar = () => {
+const Navbar = ({ scrollRefs }) => {
+  const { berandaRef, tentangKamiRef, layananKamiRef, galeriRef, faqRef } =
+    scrollRefs;
   const navigate = useNavigate();
-
   const [scroll, setScroll] = useState(false);
   const [showDropDown, setShowDropDown] = useState(false);
   const { user, logout } = useContext(AuthContext);
-  console.log("Navbar user:", user);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const scrollToSection = (ref) => {
+    ref.current?.scrollIntoView({ behavior: "smooth" });
+    setIsMenuOpen(false);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,7 +30,7 @@ const Navbar = () => {
 
   const scrollActive = scroll ? "shadow-lg" : "";
   const scroll_profile = scroll ? "" : "";
-  console.log("Avatar src:", user?.avatar);
+
   return (
     <div className="navbar fixed w-full transition-all py-4 z-50 bg-transparent">
       <div className="container mx-auto px-4">
@@ -37,23 +43,46 @@ const Navbar = () => {
           </div>
 
           {/* Menu */}
-          <ul className="flex justify-center gap-12">
-            <li className="hover:font-medium hover:underline transition-all">
-              <Link to="#beranda">Beranda</Link>
-            </li>
-            <li className="hover:font-medium hover:underline transition-all">
-              <Link to="#tentang-kami">Tentang Kami</Link>
-            </li>
-            <li className="hover:font-medium hover:underline transition-all">
-              <Link to="#layanan-kami">Layanan Kami</Link>
-            </li>
-            <li className="hover:font-medium hover:underline transition-all">
-              <Link to="#galeri">Galeri</Link>
-            </li>
-            <li className="hover:font-medium hover:underline transition-all">
-              <Link to="#faq">FAQ</Link>
-            </li>
-          </ul>
+          <div
+            className={`${
+              isMenuOpen
+                ? "right-0 opacity-100"
+                : "right-[100%] opacity-0 md:opacity-100"
+            } absolute md:static bg-[#FD1E0D] md:bg-transparent top-full left-0 w-1/2 rounded-lg shadow-md md:shadow-none md:w-auto transition-all duration-300 z-40 md:z-auto`}
+          >
+            <ul className="flex flex-col md:flex-row md:items-center gap-6 md:gap-12  text-center py-4 md:py-0 px-4 text-white md:text-black">
+              <li
+                onClick={() => scrollToSection(berandaRef)}
+                className="md:hover:font-medium md:hover:underline transition-all cursor-pointer"
+              >
+                <span>Beranda</span>
+              </li>
+              <li
+                onClick={() => scrollToSection(tentangKamiRef)}
+                className="hover:font-medium hover:underline transition-all  cursor-pointer"
+              >
+                <span>Tentang Kami</span>
+              </li>
+              <li
+                onClick={() => scrollToSection(layananKamiRef)}
+                className="hover:font-medium hover:underline transition-all  cursor-pointer"
+              >
+                <span>Layanan Kami</span>
+              </li>
+              <li
+                onClick={() => scrollToSection(galeriRef)}
+                className="hover:font-medium hover:underline transition-all  cursor-pointer"
+              >
+                <span>Galeri</span>
+              </li>
+              <li
+                onClick={() => scrollToSection(faqRef)}
+                className="hover:font-medium hover:underline transition-all  cursor-pointer"
+              >
+                <span>FAQ</span>
+              </li>
+            </ul>
+          </div>
 
           {/* login */}
           <div className="relative flex items-center gap-4">
@@ -74,7 +103,7 @@ const Navbar = () => {
                     <img
                       src={user.avatar}
                       alt="Avatar"
-                      className="w-full h-full object-cover border-2 border-red-700 rounded-full"
+                      className="w-full h-full object-cover  rounded-full"
                     />
                   ) : (
                     <FontAwesomeIcon icon={faUser} className="text-white" />
@@ -84,10 +113,10 @@ const Navbar = () => {
                 {/* Dropdown */}
                 {showDropDown && (
                   <div
-                    className={`absolute right-0 mt-2 w-40 rounded-lg text-sm z-50 ${scroll_profile}`}
+                    className={`absolute right-0 mt-3 w-35 rounded-lg text-sm z-50 bg-white shadow-lg ${scroll_profile}`}
                   >
                     <button
-                      className="block w-full text-right px-4 py-2 mt-8 hover:underline"
+                      className="block w-full text-left px-4 py-2  hover:bg-gray-100"
                       onClick={() => {
                         setShowDropDown(false); // Close dropdown after click
                       }}
@@ -95,19 +124,27 @@ const Navbar = () => {
                       Kelola Akun
                     </button>
                     <button
-                      className="block w-full text-right px-4 py-2 hover:underline"
+                      className="block w-full text-left px-4 py-2 hover:hover:bg-gray-100 text-red-500"
                       onClick={() => {
                         logout();
                         setShowDropDown(false);
                         navigate("/login");
                       }}
                     >
-                      Logout
+                      LogOut
                     </button>
                   </div>
                 )}
               </div>
             )}
+            <div
+              className="md:hidden text-2xl text-gray-600 cursor-pointer ml-4"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <span>
+                <FontAwesomeIcon icon={faBars} />
+              </span>
+            </div>
           </div>
         </div>
       </div>

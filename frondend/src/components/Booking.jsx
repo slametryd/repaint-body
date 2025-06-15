@@ -17,6 +17,8 @@ function Booking() {
   const [jenis_motor, setJenisMotor] = useState("");
   const [warna, setWarna] = useState("");
   const [qty, setQty] = useState(1);
+  const [nama, setNama] = useState("");
+  const [noWa, setNowa] = useState();
   const { picture, judul, harga, deskripsi } = location.state || {};
   const today = new Date().toISOString().split("T")[0];
 
@@ -38,70 +40,76 @@ function Booking() {
     fetchOptions();
   }, []);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log({
-      tanggal,
-      jenis_motor,
-      warna,
-      qty,
-      produkId: location.state?.id, // Pastikan produkId ada dan valid
-    });
-
-    // Validasi: Pastikan semua kolom terisi
-    if (!tanggal || !jenis_motor || !warna || !qty) {
+    // Validasi
+    if (
+      !tanggal ||
+      !jenis_motor ||
+      !warna ||
+      !qty ||
+      qty <= 0 ||
+      !nama ||
+      !noWa
+    ) {
       alert("Semua kolom harus diisi sebelum booking.");
       return;
     }
 
-    try {
-      // Kirim data booking ke server
-      const res = await axios.post("http://localhost:5000/api/bookings", {
+    // Navigasi ke halaman detailbooking tanpa simpan ke database
+    navigate("/detailbooking", {
+      state: {
+        nama,
+        noWa,
+        picture,
+        judul,
+        harga,
+        deskripsi,
         tanggal,
         jenis_motor,
         warna,
         qty,
-        produkId: location.state?.id, // Pastikan ID produk yang tepat
-      });
-
-      // Ambil data booking dari server, termasuk total_harga yang dihitung oleh backend
-      const { booking } = res.data;
-
-      // Navigasi ke halaman detail booking dan kirimkan data booking termasuk total_harga
-      navigate("/detailbooking", {
-        state: {
-          picture,
-          judul,
-          harga,
-          deskripsi,
-          tanggal,
-          jenis_motor,
-          warna,
-          qty,
-          total_harga: booking.total_harga, // Ambil total_harga dari response backend
-        },
-      });
-    } catch (error) {
-      console.error("Gagal booking:", error.response?.data || error.message);
-    }
+        total_harga: harga * qty, // atau biarkan dihitung di backend saat payment
+        produkId: location.state?.id,
+      },
+    });
   };
 
   return (
-    <div className="w-ful">
-      <div className="container px-4 mx-auto mb-20 min-h-screen flex flex-col ">
+    <div className="w-full">
+      <div className="container px-4 sm:px-6 lg:px-8 mx-auto mb-20 min-h-screen flex flex-col  ">
         <div className="">
-          <h1 className="font-extrabold text-2xl  my-7 ">
+          <h1 className="font-extrabold text-2xl  mt-7 ">
             <span onClick={() => navigate(`/`)} className="pr-3 cursor-pointer">
               <FontAwesomeIcon icon={faArrowLeft} />
             </span>{" "}
             BOOKING ORDER
           </h1>
         </div>
-        <div className="flex  justify-between items-center h-full pt-32">
-          <form onSubmit={handleSubmit} className="w-[600px]  ">
-            <h1 className="font-extrabold text-5xl mb-7">Isi detail pesanan</h1>
+        <div className="flex flex-col md:flex-row justify-between items-center pt-32">
+          <form onSubmit={handleSubmit} className="w-full md:max-w-xl">
+            <h1 className="font-extrabold text-3xl sm:text-5xl mb-7">
+              Isi detail pesanan
+            </h1>
+            <div className="flex flex-col justify-center"></div>
             <div className="flex flex-col justify-center mb-4">
+              <label className="mb-2 block">Masukkan Nama Anda</label>
+              <input
+                type="text"
+                placeholder="Nama Anda"
+                value={nama}
+                onChange={(e) => setNama(e.target.value)}
+                className="outline-0 border-b-2 mb-4"
+              />
+              <label className="mb-2">Masukkan Nomor Whatsapp</label>
+              <input
+                type="text"
+                placeholder="No Whatsapp"
+                value={noWa}
+                onChange={(e) => setNowa(e.target.value)}
+                className="outline-0 border-b-2 mb-4"
+              />
               <label className="mb-2">Pilih tangal booking</label>
               <input
                 type="date"
@@ -153,19 +161,21 @@ function Booking() {
             <div className="">
               <button
                 type="submit"
-                className="bg-[#FD1E0D] font-medium px-5 py-2 rounded-full font text-white hover:bg-[#ED1100] transition-all mb-2"
+                className="w-full sm:w-auto bg-[#FD1E0D] font-medium px-5 py-2 rounded-full font text-white hover:bg-[#ED1100] transition-all mb-2"
               >
                 Check Out
               </button>
             </div>
           </form>
-          <div className="">
-            <img
-              src={`http://localhost:5000/uploads/${picture}`}
-              className="w-[300px] mx-auto  rounded-2xl"
-              alt=""
-            />
-          </div>
+          {picture && (
+            <div className=" md:w-auto mt-10 md:mt-0 ">
+              <img
+                src={`http://localhost:5000/uploads/${picture}`}
+                className="w-[400px] mx-auto  rounded-2xl"
+                alt=""
+              />
+            </div>
+          )}
         </div>
       </div>
       <div className="">

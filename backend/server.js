@@ -9,6 +9,7 @@ import bookingRoutes from "./controllers/booking_routes.js";
 import motorOptions from "./controllers/motorOptions.js";
 import paymentRoutes from "./controllers/payment.js";
 import emailRoutes from "./controllers/nodemailer.js";
+import midtransWebhookRoutes from "./controllers/midtransWebhook.js";
 
 dotEnv.config();
 const app = express();
@@ -26,10 +27,11 @@ app.use(router);
 app.use("/api/auth", router);
 app.use("/api", productRoutes);
 app.use("/uploads", express.static("uploads"));
-app.use("/api", bookingRoutes); // di file server.js
+app.use("/api", bookingRoutes);
 app.use("/api", motorOptions);
 app.use("/api", paymentRoutes);
 app.use("/api", emailRoutes);
+app.use("/api", midtransWebhookRoutes);
 
 try {
   await db.authenticate();
