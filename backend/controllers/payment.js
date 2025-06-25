@@ -54,4 +54,24 @@ router.put("/api/bookings/:order_id", async (req, res) => {
   }
 });
 
+router.post("/midtrans-webhook", async (req, res) => {
+  try {
+    const notification = req.body;
+    const orderId = notification.order_id;
+    const status = notification.transaction_status;
+    console.log("Notifikasi Midtrans diterima:", notification);
+
+    // Update status_pembayaran di DB
+    await Booking.update(
+      { status_pembayaran: status },
+      { where: { order_id: orderId } }
+    );
+
+    res.status(200).json({ msg: "Notifikasi diterima" });
+  } catch (error) {
+    console.error("Webhook error:", error);
+    res.status(500).json({ msg: "Gagal proses webhook" });
+  }
+});
+
 export default router;

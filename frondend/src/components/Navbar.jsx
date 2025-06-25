@@ -116,15 +116,7 @@ const Navbar = ({ scrollRefs }) => {
                     className={`absolute right-0 mt-3 w-35 rounded-lg text-sm z-50 bg-white shadow-lg ${scroll_profile}`}
                   >
                     <button
-                      className="block w-full text-left px-4 py-2  hover:bg-gray-100"
-                      onClick={() => {
-                        setShowDropDown(false); // Close dropdown after click
-                      }}
-                    >
-                      Kelola Akun
-                    </button>
-                    <button
-                      className="block w-full text-left px-4 py-2 hover:hover:bg-gray-100 text-red-500"
+                      className="block w-full text-left px-4 py-2 rounded-lg hover:hover:bg-gray-100 text-red-500"
                       onClick={() => {
                         logout();
                         setShowDropDown(false);

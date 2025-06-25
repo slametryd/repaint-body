@@ -111,26 +111,26 @@ function UpdateBooking() {
     }
   };
 
-  const handleSimpanJenis = async (e) => {
-    e.preventDefault();
-    try {
-      if (editJenisId) {
-        await axios.put(
-          `http://localhost:5000/api/jenis_motor/${editJenisId}`,
-          {
-            jenis,
-          }
-        );
-        setEditJenisId(null);
-      } else {
-        await axios.post("http://localhost:5000/api/jenis_motor", { jenis });
-      }
-      setJenis("");
-      fetchData();
-    } catch (error) {
-      alert("Gagal menyimpan jenis");
-    }
-  };
+  // const handleSimpanJenis = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     if (editJenisId) {
+  //       await axios.put(
+  //         `http://localhost:5000/api/jenis_motor/${editJenisId}`,
+  //         {
+  //           jenis,
+  //         }
+  //       );
+  //       setEditJenisId(null);
+  //     } else {
+  //       await axios.post("http://localhost:5000/api/jenis_motor", { jenis });
+  //     }
+  //     setJenis("");
+  //     fetchData();
+  //   } catch (error) {
+  //     alert("Gagal menyimpan jenis");
+  //   }
+  // };
 
   const handleEditWarna = (id, value) => {
     setEditWarnaId(id);
@@ -223,7 +223,7 @@ function UpdateBooking() {
             </form>
 
             {/* Jenis Form */}
-            <form onSubmit={handleSimpanJenis} className="mt-10">
+            <form onSubmit={handleSimpanData} className="mt-10">
               <h2 className="font-bold text-xl md:text-2xl mb-2">
                 Update Jenis Motor
               </h2>
@@ -311,13 +311,13 @@ function UpdateBooking() {
                     <span className="font-semibold">{nama}</span>
                     <div className="flex gap-3">
                       <button
-                        onClick={() => handleDeleteWarna(id)}
+                        onClick={() => handleDeleteJenis(id)}
                         className="text-red-600 hover:text-red-800"
                       >
                         <FontAwesomeIcon icon={faTrashCan} />
                       </button>
                       <button
-                        onClick={() => handleEditWarna(id, nama)}
+                        onClick={() => handleEditJenis(id, nama)}
                         className="text-blue-600 hover:text-blue-800"
                       >
                         <FontAwesomeIcon icon={faPenToSquare} />

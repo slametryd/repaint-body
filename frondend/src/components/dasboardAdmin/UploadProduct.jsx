@@ -12,9 +12,19 @@ function UploadProduct() {
   const [pindahMenu, setPindahMenu] = useState("upload");
   const [produkList, setProdukList] = useState([]);
   const [editId, setEditId] = useState(null);
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString("id-ID", options);
+  };
 
   useEffect(() => {
-    if (pindahMenu === "produkSaya" && produkList.length === 0) {
+    if (pindahMenu === "produkSaya") {
       const fetchProduk = async () => {
         try {
           const res = await axios.get("http://localhost:5000/api/produk");
@@ -23,9 +33,10 @@ function UploadProduct() {
           console.error("Gagal mengambil produk:", error);
         }
       };
+
       fetchProduk();
     }
-  }, [pindahMenu, produkList.length]);
+  }, [pindahMenu]);
 
   const handleDelete = async (id) => {
     const konfirmasi = window.confirm(
@@ -92,8 +103,6 @@ function UploadProduct() {
                   judul,
                   harga,
                   deskripsi,
-                  // Jika ada gambar baru, update dengan nama file baru
-                  // Kalau tidak, tetap pakai gambar lama
                   picture: picture ? picture.name : item.picture,
                 }
               : item
@@ -214,23 +223,34 @@ function UploadProduct() {
                     alt={produk.judul}
                     className="w-full h-48 object-cover rounded mb-2"
                   />
-                  <h3 className="font-semibold">{produk.judul}</h3>
-                  <p>Rp {produk.harga}</p>
-                  <p className="text-sm text-gray-600">{produk.deskripsi}</p>
+                  <div className="flex justify-between">
+                    <h3 className="font-semibold">{produk.judul}</h3>
+                    <div className="flex justify-between gap-2">
+                      <button
+                        onClick={() => handleEdit(produk)}
+                        className="text-sm bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 text-white"
+                      >
+                        <FontAwesomeIcon icon={faPenToSquare} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(produk.id)}
+                        className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        <FontAwesomeIcon icon={faTrashCan} />
+                      </button>
+                    </div>
+                  </div>
 
-                  <div className="flex justify-end gap-2 mt-2">
-                    <button
-                      onClick={() => handleDelete(produk.id)}
-                      className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                    >
-                      <FontAwesomeIcon icon={faTrashCan} />
-                    </button>
-                    <button
-                      onClick={() => handleEdit(produk)}
-                      className="text-sm bg-blue-600 px-3 py-1 rounded hover:bg-blue-700 text-white"
-                    >
-                      <FontAwesomeIcon icon={faPenToSquare} />
-                    </button>
+                  <p className="text-red-500">Rp {produk.harga}</p>
+                  <p className="text-sm text-gray-950">{produk.deskripsi}</p>
+
+                  <div className="mt-2">
+                    <div className="dellate flex justify-between ">
+                      <div className="text-xs text-gray-500 mt-1">
+                        Dibuat: {formatDate(produk.createdAt)} <br />
+                        Diperbarui: {formatDate(produk.updatedAt)}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}

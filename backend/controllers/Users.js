@@ -2,13 +2,18 @@ import Users from "../models/UserModels.js";
 import admin from "../controllers/firebaseAdmin.js";
 import bcrypt from "bcrypt";
 import JWT from "jsonwebtoken";
+import db from "../config/Database.js";
 import { OAuth2Client } from "google-auth-library";
-import { configDotenv } from "dotenv";
+import dotenv from "dotenv";
+dotenv.config();
+import crypto from "crypto";
+import nodemailer from "nodemailer";
 
+// 🔹 GET all users (kecuali password/token)
 export const getUsers = async (req, res) => {
   try {
     const users = await Users.findAll({
-      attributes: ["id", "name", "email"], // Tidak mengirim password dan token
+      attributes: ["id", "name", "email"],
     });
     res.json(users);
   } catch (error) {
@@ -17,13 +22,8 @@ export const getUsers = async (req, res) => {
   }
 };
 
-// (async () => {
-//   await Users.sync({ alter: true }); // akan menyesuaikan tabel dengan model terbaru, menambah kolom baru jika belum ada
-//   console.log("Booking table updated!");
-// })();
-
+// 🔹 REGISTER user
 export const Register = async (req, res) => {
-  console.log("BODY YANG DITERIMA:", req.body);
   const { name, email, password, confPassword } = req.body;
   if (password !== confPassword)
     return res
@@ -34,11 +34,12 @@ export const Register = async (req, res) => {
     const salt = await bcrypt.genSalt();
     const hashPassword = await bcrypt.hash(password, salt);
     await Users.create({
-      name: name,
-      email: email,
+      name,
+      email,
       password: hashPassword,
-      role: "user", // default role
+      role: "user",
     });
+
     res.json({ msg: "Register berhasil" });
   } catch (error) {
     console.error("Error saat register:", error);
@@ -46,7 +47,9 @@ export const Register = async (req, res) => {
   }
 };
 
+// 🔹 LOGIN user
 export const login = async (req, res) => {
+  console.log("Login body:", req.body);
   try {
     const { email, password } = req.body;
     if (!email || !password)
@@ -55,14 +58,14 @@ export const login = async (req, res) => {
     const user = await Users.findOne({ where: { email } });
     if (!user) return res.status(404).json({ msg: "Email tidak ditemukan" });
     if (!user.password)
-      return res.status(500).json({ msg: "User tidak memiliki password" });
+      return res.status(400).json({
+        msg: "Akun ini tidak memiliki password, gunakan login Google",
+      });
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) return res.status(400).json({ msg: "Password salah" });
 
-    const userId = user.id;
-    const name = user.name;
-    const role = user.role;
+    const { id: userId, name, role } = user;
 
     const accessToken = JWT.sign(
       { userId, name, email, role },
@@ -90,12 +93,7 @@ export const login = async (req, res) => {
     res.json({
       msg: "Login berhasil",
       accessToken,
-      user: {
-        id: userId,
-        name,
-        email,
-        role,
-      },
+      user: { id: userId, name, email, role },
     });
   } catch (error) {
     console.error("Error saat login:", error);
@@ -103,38 +101,28 @@ export const login = async (req, res) => {
   }
 };
 
+// 🔹 LOGOUT user
 export const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) return res.sendStatus(204); // Jika tidak ada refresh token
-
-    console.log("Refresh Token:", refreshToken);
+    if (!refreshToken) return res.sendStatus(204);
 
     const user = await Users.findOne({
-      where: {
-        refresh_token: refreshToken,
-      },
+      where: { refresh_token: refreshToken },
     });
 
-    if (!user) {
-      console.log("User dengan refresh token tidak ditemukan");
-      return res.sendStatus(204); // Tidak ada user dengan refresh token ini
-    }
+    if (!user) return res.sendStatus(204);
 
-    // Clear refresh token di database
     await Users.update({ refresh_token: null }, { where: { id: user.id } });
-
-    // Hapus refresh token di cookie
     res.clearCookie("refreshToken");
-    return res.sendStatus(200); // Berhasil logout
+    return res.sendStatus(200);
   } catch (error) {
     console.error("Error saat logout:", error);
     return res.status(500).json({ msg: "Gagal logout" });
   }
 };
 
-// GOOlGLE login
-
+// 🔹 LOGIN via Google (Firebase Admin SDK)
 export const googleLogin = async (req, res) => {
   const { token } = req.body;
   if (!token) return res.status(400).json({ msg: "Token is required" });
@@ -150,7 +138,7 @@ export const googleLogin = async (req, res) => {
         email,
         avatar: picture,
         password: "",
-        role: "admin",
+        role: "user",
       });
     }
 
@@ -196,11 +184,79 @@ export const googleLogin = async (req, res) => {
   }
 };
 
+// 🔹 MIDDLEWARE Verifikasi Token
 export const verifyToken = (req, res, next) => {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
 
-  console.log("Token yang dikirim:", token); // Tambahkan ini untuk debugging
-
   if (!token) return res.sendStatus(401);
+
+  JWT.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+    if (err) return res.sendStatus(403); // Token kadaluarsa/tidak valid
+    req.user = decoded;
+    next(); // ⬅️ Jangan lupa ini
+  });
+};
+
+// 🔹 Kirim link reset password
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await Users.findOne({ where: { email } });
+  if (!user) return res.status(404).json({ msg: "Email tidak ditemukan" });
+
+  const token = crypto.randomBytes(32).toString("hex");
+  const resetToken = JWT.sign({ id: user.id }, process.env.RESET_TOKEN_SECRET, {
+    expiresIn: "15m",
+  });
+
+  const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+
+  // Kirim email
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  await transporter.sendMail({
+    from: `"Reset Password" <${process.env.EMAIL_USER}>`,
+    to: email,
+    subject: "Reset Password",
+    html: `<p>Klik link berikut untuk mengatur ulang password:</p>
+           <a href="${resetLink}">${resetLink}</a>`,
+  });
+
+  res.json({ msg: "Link reset password telah dikirim ke email Anda" });
+};
+
+// 🔹 Reset Password (via token)
+export const resetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { password, confPassword } = req.body;
+
+  if (!password || !confPassword)
+    return res.status(400).json({ msg: "Semua field wajib diisi" });
+
+  if (password !== confPassword)
+    return res.status(400).json({ msg: "Password tidak cocok" });
+
+  try {
+    const decoded = JWT.verify(token, process.env.RESET_TOKEN_SECRET);
+    const user = await Users.findOne({ where: { id: decoded.id } });
+
+    if (!user) return res.status(404).json({ msg: "User tidak ditemukan" });
+
+    const salt = await bcrypt.genSalt();
+    const hashPassword = await bcrypt.hash(password, salt);
+
+    await Users.update({ password: hashPassword }, { where: { id: user.id } });
+
+    res.json({ msg: "Password berhasil diubah, silakan login" });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    return res.status(403).json({ msg: "Token tidak valid atau kadaluarsa" });
+  }
 };

@@ -9,6 +9,8 @@ import DetailProduct from "./pages/DetailProduct";
 import AdminPage from "./pages/AdminPage";
 import { AuthProvider } from "./components/AuthContext"; // path sesuai struktur kamu
 import AdminRoute from "./components/adminRoute";
+import ResetPassword from "./pages/LupaPassword";
+import ResetPage from "./pages/ResetPage";
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
           <Route path="/booking" element={<BookingPage />} />
           <Route path="/detailbooking" element={<DetailBookingPage />} />
           <Route path="/detailproduct" element={<DetailProduct />} />
+          <Route path="/forgot-password" element={<ResetPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPage />} />
           <Route
             path="/admin"
             element={

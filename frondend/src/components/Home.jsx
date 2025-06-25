@@ -7,7 +7,13 @@ import Element2 from "../assets/element2.png";
 import Element from "../assets/element.png";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronUp,
+  faChevronDown,
+  faArrowLeft,
+  faXmark,
+  faTriangleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
 import { AuthContext } from "./AuthContext";
 import React, { useEffect, useState, useContext, useRef } from "react";
 import { useLocation } from "react-router-dom";
@@ -36,6 +42,7 @@ const Home = ({ sectionRefs }) => {
   const [produk, setProduk] = useState([]);
   const { user, login } = useContext(AuthContext);
   const location = useLocation();
+  const [showModel, setShowModel] = useState(false);
 
   const { berandaRef, tentangKamiRef, layananKamiRef, galeriRef, faqRef } =
     sectionRefs;
@@ -72,14 +79,13 @@ const Home = ({ sectionRefs }) => {
     const accessToken = localStorage.getItem("accessToken");
 
     if (!accessToken) {
-      alert("Silakan login terlebih dahulu untuk melakukan booking.");
-      navigate("/login");
+      setShowModel(true);
       return;
     }
 
     try {
       // Jika kamu perlu validasi token atau refresh token, buat fungsi khusus refresh token di sini
-      const response = await axios.get("http://localhost:5000/users", {
+      const response = await axios.get("http://localhost:5000/api/auth/users", {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -180,7 +186,7 @@ const Home = ({ sectionRefs }) => {
           <p className="mb-7 font-medium text-center">
             Apakah kamu ingin tampilan motor yang klasik, elegan, atau nyentrik?{" "}
           </p>
-          <div className="card-box flex flex-wrap gap-8 items-center justify-center">
+          <div className="card-box flex flex-wrap gap-12 items-center justify-between">
             {produk.map((item) => (
               <div
                 key={item.id}
@@ -192,7 +198,7 @@ const Home = ({ sectionRefs }) => {
                   alt=""
                 />
                 <h3 className="font-bold text-[20px] px-4 ">{item.judul}</h3>
-                <p className="text-gray-500 mb-4 px-4">{item.harga}</p>
+                <p className="text-[#FD1E0D] mb-4 px-4"> Rp.{item.harga}</p>
                 <p className="mb-5 font-medium px-4">{item.deskripsi}</p>
                 <div className="button flex justify-between items-center  px-4">
                   <button
@@ -275,6 +281,29 @@ const Home = ({ sectionRefs }) => {
             </div>
           ))}
         </div>
+        {showModel && (
+          <div className="popUp  fixed bg-black/50 min-h-screen z-10 w-screen flex justify-center items-center top-0 left-0">
+            <div className=" relative rounded-2xl w-[400px] h-[200px] bg-white p-4 flex flex-col gap-4 items-center">
+              <span className="text-5xl text-red-500 text-center">
+                <FontAwesomeIcon icon={faTriangleExclamation} />
+              </span>
+              <h2 className="text-xl font-bold ">
+                Silahkan login terlebih dahulu!{" "}
+              </h2>
+              <p className="text-center font-medium text-gray-400 text-[14px]">
+                Untuk melakukan proses booking harap login terlebih dahulu
+              </p>
+              <div
+                onClick={() => setShowModel(false)}
+                className="absolute top-4 font-black right-4 cursor-pointer hover:bg-gray-500 px-4 py-3 rounded-md hover:text-white"
+              >
+                <span>
+                  <FontAwesomeIcon icon={faXmark} />
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

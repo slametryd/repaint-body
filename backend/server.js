@@ -5,14 +5,19 @@ import dotEnv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import productRoutes from "./controllers/product_rout.js";
-import bookingRoutes from "./controllers/booking_routes.js";
+import bookingRoutes, {
+  updateBookingStatus,
+} from "./controllers/booking_routes.js";
 import motorOptions from "./controllers/motorOptions.js";
 import paymentRoutes from "./controllers/payment.js";
 import emailRoutes from "./controllers/nodemailer.js";
-import midtransWebhookRoutes from "./controllers/midtransWebhook.js";
+
+// import midtransWebhookRoutes from "./controllers/midtransWebhook.js";
 
 dotEnv.config();
 const app = express();
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
   cors({
@@ -22,8 +27,7 @@ app.use(
   })
 );
 app.use(cookieParser());
-app.use(express.json());
-app.use(router);
+
 app.use("/api/auth", router);
 app.use("/api", productRoutes);
 app.use("/uploads", express.static("uploads"));
@@ -31,7 +35,9 @@ app.use("/api", bookingRoutes);
 app.use("/api", motorOptions);
 app.use("/api", paymentRoutes);
 app.use("/api", emailRoutes);
-app.use("/api", midtransWebhookRoutes);
+app.put("/api/booking-status/:orderId", updateBookingStatus);
+
+// app.use("/api", midtransWebhookRoutes);
 
 try {
   await db.authenticate();

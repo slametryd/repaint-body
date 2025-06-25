@@ -5,8 +5,8 @@ import WarnaMotor from "../models/WarnaMotor.js"; // import model
 const router = express.Router();
 
 // (async () => {
-//   await WarnaMotor.sync({ alter: true }); // akan menyesuaikan tabel dengan model terbaru, menambah kolom baru jika belum ada
-//   console.log("Booking table updated!");
+//   await JenisMotor.sync({ alter: true }); // akan menyesuaikan tabel dengan model terbaru, menambah kolom baru jika belum ada
+//   console.log("produk table updated!");
 // })();
 
 // GET: ambil data jenis_motor dan warna_motor dari MySQL
@@ -38,7 +38,12 @@ router.post("/warna_motor", async (req, res) => {
       return res.status(400).json({ message: "Warna tidak boleh kosong" });
     }
 
-    await WarnaMotor.create({ nama: warna });
+    await WarnaMotor.create({
+      nama: warna,
+      lastUpdateBy: "admin",
+      lastUpdateDate: new Date(),
+      status: "aktif",
+    });
     res.status(201).json({ message: "Warna berhasil ditambahkan" });
   } catch (err) {
     console.error("Gagal menyimpan warna:", err);
@@ -54,7 +59,12 @@ router.post("/jenis_motor", async (req, res) => {
       return res.status(400).json({ message: "jenis tidak boleh kosong" });
     }
 
-    await JenisMotor.create({ nama: jenis });
+    await JenisMotor.create({
+      nama: jenis,
+      lastUpdateBy: "admin", // atau user login
+      lastUpdateDate: new Date(),
+      status: "aktif",
+    });
     res.status(201).json({ message: "jenis berhasil ditambahkan" });
   } catch (err) {
     console.error("Gagal menyimpan jenis:", err);

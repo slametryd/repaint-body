@@ -118,19 +118,10 @@ function AdminDasboard() {
                     {dropdownOpen && (
                       <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
                         <button
-                          className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                          onClick={() => {
-                            window.location.href = "";
-                            setDropdownOpen(false);
-                          }}
-                        >
-                          Kelola Akun
-                        </button>
-                        <button
                           className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
                           onClick={handleLogout}
                         >
-                          Logout
+                          LogOut
                         </button>
                       </div>
                     )}

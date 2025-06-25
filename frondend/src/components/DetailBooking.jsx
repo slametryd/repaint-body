@@ -3,7 +3,10 @@ import Footer from "./Footer";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faTriangleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
 import { useLocation } from "react-router-dom";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext";
@@ -13,6 +16,7 @@ function DetailBooking() {
   const location = useLocation();
   const user = JSON.parse(localStorage.getItem("user"));
   const userEmail = user?.email || "email-default@example.com";
+  const [showModel, setShowModel] = useState(false);
 
   const {
     picture = "",
@@ -67,9 +71,10 @@ function DetailBooking() {
 
       window.snap.pay(snapToken, {
         onSuccess: async function (result) {
-          alert("Pembayaran berhasil!");
+          alert("pembayaran berhasil");
           console.log("Success", result);
 
+          // Kirim email
           await axios.post("http://localhost:5000/api/send-email", {
             nama,
             noWa,
@@ -88,13 +93,16 @@ function DetailBooking() {
             },
           });
 
+          // Update status pembayaran
           await axios.put(
             `http://localhost:5000/api/booking-status/${result.order_id}`,
             {
               status: result.transaction_status,
             }
           );
-          navigate("/");
+
+          // ✅ Navigasi ke home setelah semua proses selesai
+          navigate("/", { replace: true });
         },
 
         onPending: async function (result) {
@@ -126,7 +134,7 @@ function DetailBooking() {
         },
 
         onClose: function () {
-          alert("Kamu belum menyelesaikan pembayaran.");
+          alert("kamu belum melakukan pembayaran");
         },
       });
     } catch (error) {
@@ -238,6 +246,28 @@ function DetailBooking() {
             </button>
           </div>
         </div>
+        {/* {showModel && (
+          <div className="popUp  fixed bg-black/50 min-h-screen z-10 w-screen flex justify-center items-center top-0 left-0">
+            <div className=" relative rounded-2xl w-[400px] h-[200px] bg-white p-4 flex flex-col gap-4 items-center">
+              <span className="text-5xl text-red-500 text-center">
+                <FontAwesomeIcon icon={faTriangleExclamation} />
+              </span>
+              <h2 className="text-xl font-bold ">Harap isi semua data!</h2>
+              <p className="text-center font-medium text-gray-400 text-[14px]">
+                Untuk memudahkan proses booking data yang dibutuhkan harap
+                dilengkapi
+              </p>
+              <div
+                onClick={() => setShowModel(false)}
+                className="absolute top-4 font-black right-4 cursor-pointer hover:bg-gray-500 px-4 py-3 rounded-md hover:text-white"
+              >
+                <span>
+                  <FontAwesomeIcon icon={faXmark} />
+                </span>
+              </div>
+            </div>
+          </div>
+        )} */}
       </div>
       <div>
         <Footer />

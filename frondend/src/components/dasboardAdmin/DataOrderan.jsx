@@ -18,6 +18,12 @@ function DataOrderan() {
       }
     };
 
+    //  const resStatus = await axios.put(
+    //       `http://localhost:5000/api/booking-status/${order_id}`,
+    //       { status_pembayaran: "settlement" },
+    //       { headers: { "Content-Type": "application/json" } }
+    //     );
+
     fetchData();
     const interval = setInterval(fetchData, 10000); // refresh setiap 10 detik
     return () => clearInterval(interval);

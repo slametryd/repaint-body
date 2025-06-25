@@ -5,7 +5,13 @@ import Footer from "./Footer";
 import { useNavigate } from "react-router-dom";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faL,
+  faLariSign,
+  faXmark,
+  faTriangleExclamation,
+} from "@fortawesome/free-solid-svg-icons";
 import { useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
@@ -21,6 +27,7 @@ function Booking() {
   const [noWa, setNowa] = useState();
   const { picture, judul, harga, deskripsi } = location.state || {};
   const today = new Date().toISOString().split("T")[0];
+  const [showModel, setShowModel] = useState(false);
 
   // State untuk menampung data dari backend
   const [motorOptions, setMotorOptions] = useState([]);
@@ -53,7 +60,7 @@ function Booking() {
       !nama ||
       !noWa
     ) {
-      alert("Semua kolom harus diisi sebelum booking.");
+      setShowModel(true);
       return;
     }
 
@@ -177,6 +184,28 @@ function Booking() {
             </div>
           )}
         </div>
+        {showModel && (
+          <div className="popUp  fixed bg-black/50 min-h-screen z-10 w-screen flex justify-center items-center top-0 left-0">
+            <div className=" relative rounded-2xl w-[400px] h-[200px] bg-white p-4 flex flex-col gap-4 items-center">
+              <span className="text-5xl text-red-500 text-center">
+                <FontAwesomeIcon icon={faTriangleExclamation} />
+              </span>
+              <h2 className="text-xl font-bold ">Harap isi semua data!</h2>
+              <p className="text-center font-medium text-gray-400 text-[14px]">
+                Untuk memudahkan proses booking data yang dibutuhkan harap
+                dilengkapi
+              </p>
+              <div
+                onClick={() => setShowModel(false)}
+                className="absolute top-4 font-black right-4 cursor-pointer hover:bg-gray-500 px-4 py-3 rounded-md hover:text-white"
+              >
+                <span>
+                  <FontAwesomeIcon icon={faXmark} />
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
       <div className="">
         <Footer />

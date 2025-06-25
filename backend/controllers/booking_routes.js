@@ -78,4 +78,27 @@ router.post("/bookings", async (req, res) => {
   }
 });
 
+export const updateBookingStatus = async (req, res) => {
+  const { orderId } = req.params;
+  const { status_pembayaran } = req.body;
+
+  try {
+    const booking = await Booking.findOne({ where: { order_id: orderId } });
+
+    if (!booking) {
+      return res.status(404).json({ msg: "Booking tidak ditemukan" });
+    }
+
+    await Booking.update(
+      { status_pembayaran },
+      { where: { order_id: orderId } }
+    );
+
+    res.status(200).json({ msg: "Status pembayaran berhasil diperbarui" });
+  } catch (error) {
+    console.error("Update status gagal:", error);
+    res.status(500).json({ msg: "Terjadi kesalahan" });
+  }
+};
+
 export default router;

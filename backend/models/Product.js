@@ -13,9 +13,18 @@ const Product = sequelize.define(
     harga: DataTypes.INTEGER,
     deskripsi: DataTypes.STRING,
     picture: DataTypes.STRING,
-    status: DataTypes.STRING,
-    LastUpdateBy: DataTypes.STRING,
-    LastUpdateDate: DataTypes.STRING,
+    status: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    LastUpdateBy: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    LastUpdateDate: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     tableName: "product",
